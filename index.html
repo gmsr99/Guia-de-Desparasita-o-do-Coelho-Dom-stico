@@ -2,331 +2,351 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia de Desparasitação do Coelho Doméstico</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guia de Desparasitação do Coelho</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Chosen Palette: Nature & Calm -->
-    <!-- Primary: #4ADE80 (Green-400) for safe/positive actions -->
-    <!-- Secondary: #FCD34D (Amber-300) for warnings -->
-    <!-- Background: #FAFAF9 (Warm Gray/Stone) -->
-    <!-- Text: #1C1917 (Stone-900) -->
-
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #FAFAF9; color: #1C1917; }
+        body { font-family: 'Nunito', sans-serif; background-color: #FAFAF9; color: #1C1917; -webkit-tap-highlight-color: transparent; }
+        
+        /* Otimização Mobile para Gráficos */
         .chart-container { 
             position: relative; 
             width: 100%; 
-            max-width: 600px; 
-            margin: 0 auto; 
-            height: 300px; 
+            height: 250px; /* Altura menor para mobile */
             max-height: 400px; 
         }
-        .card {
-            transition: transform 0.2s, box-shadow 0.2s;
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
         }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+        /* Cartões com toque moderno */
+        .card { transition: transform 0.2s, box-shadow 0.2s; }
+        .card:active { transform: scale(0.98); } /* Feedback tátil */
+
+        /* Navegação Mobile com Scroll Horizontal */
+        .nav-scroll {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
         }
+        .nav-scroll::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+
         .active-tab {
             border-bottom: 3px solid #16A34A;
             color: #16A34A;
-            font-weight: 700;
+            font-weight: 800;
         }
+
         .hidden-section { display: none; }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Utility for button states in calculator */
+        /* Botões da Calculadora - Estilo "App" */
+        .risk-btn {
+            transition: all 0.2s;
+            border-width: 2px;
+        }
         .btn-selected {
             background-color: #DCFCE7; /* Green-100 */
-            border-color: #22C55E; /* Green-500 */
+            border-color: #16A34A; /* Green-600 */
             color: #14532D; /* Green-900 */
-            font-weight: 700;
+            font-weight: 800;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen pb-safe">
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <span class="text-2xl text-green-600 mr-2">🐰</span>
-                    <h1 class="text-xl font-bold tracking-tight text-stone-800">CoelhoSaudável <span class="text-stone-400 font-light hidden sm:inline">| Investigação Antiparasitária</span></h1>
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-stone-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Brand -->
+                <div class="flex items-center flex-shrink-0 mr-4">
+                    <span class="text-2xl mr-2">🐰</span>
+                    <h1 class="text-lg font-bold leading-tight text-stone-800">
+                        CoelhoSaudável
+                        <span class="hidden sm:inline text-stone-400 font-light text-sm">| Investigação</span>
+                    </h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-2 text-sm font-medium active-tab transition-colors">Visão Geral</button>
-                    <button onclick="switchTab('calculator')" id="nav-calculator" class="px-3 py-2 text-sm font-medium text-stone-500 hover:text-green-600 transition-colors">Calculadora de Risco</button>
-                    <button onclick="switchTab('analysis')" id="nav-analysis" class="px-3 py-2 text-sm font-medium text-stone-500 hover:text-green-600 transition-colors">Dados & Ciência</button>
+                <!-- Menu (Scrollable on mobile) -->
+                <div class="nav-scroll flex space-x-6 h-16 items-center">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="whitespace-nowrap py-2 text-sm font-bold active-tab transition-colors">Visão Geral</button>
+                    <button onclick="switchTab('calculator')" id="nav-calculator" class="whitespace-nowrap py-2 text-sm font-bold text-stone-500 hover:text-green-600 transition-colors">Calculadora</button>
+                    <button onclick="switchTab('analysis')" id="nav-analysis" class="whitespace-nowrap py-2 text-sm font-bold text-stone-500 hover:text-green-600 transition-colors">Dados</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
 
         <!-- VIEW 1: DASHBOARD (Overview) -->
-        <div id="dashboard" class="fade-in space-y-8">
+        <div id="dashboard" class="fade-in space-y-6">
             
             <!-- Hero Insight -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-green-500">
-                <div class="p-6 md:p-8">
-                    <h2 class="text-2xl font-bold text-stone-800 mb-4">Veredito Rápido: Devo dar "Telmi" de vez em quando?</h2>
-                    <p class="text-lg text-stone-600 mb-6 leading-relaxed">
-                        A resposta curta é: <strong>Depende, mas provavelmente não como rotina cega.</strong> 
-                        A desparasitação moderna em coelhos não é feita "por calendário" como em cães. 
-                        O foco deve ser a prevenção do <em>E. cuniculi</em> (onde o "Telmi" pode não ser o mais eficaz) e exames de fezes para parasitas intestinais.
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden border-l-8 border-green-500">
+                <div class="p-6">
+                    <h2 class="text-xl md:text-2xl font-extrabold text-stone-800 mb-3">Veredito: "Telmi" de rotina?</h2>
+                    <p class="text-base md:text-lg text-stone-600 mb-6 leading-relaxed">
+                        A resposta curta é: <strong>Depende, mas evite dar "às cegas".</strong><br>
+                        A desparasitação moderna foca-se na prevenção do <em>E. cuniculi</em> e não em vermes intestinais, a menos que confirmados.
                     </p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
-                            <h3 class="font-bold text-stone-700 mb-2">🚫 Não dê por dar</h3>
-                            <p class="text-sm text-stone-600">Desparasitantes químicos sobrecarregam o fígado. Só use se houver risco confirmado ou protocolo de chegada.</p>
+                    <!-- Quick Stats Cards (Mobile Grid) -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 flex items-start">
+                            <span class="text-2xl mr-3">🚫</span>
+                            <div>
+                                <h3 class="font-bold text-stone-800 text-sm">Não dê por dar</h3>
+                                <p class="text-xs text-stone-500 mt-1">Químicos sobrecarregam o fígado. Use apenas com risco confirmado.</p>
+                            </div>
                         </div>
-                        <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                            <h3 class="font-bold text-amber-800 mb-2">⚠️ Cuidado com "Telmi"</h3>
-                            <p class="text-sm text-amber-800">"Telmi" (Mebendazol) é diferente de Panacur (Fenbendazol). O Fenbendazol é o padrão para o parasita mais perigoso.</p>
+                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 flex items-start">
+                            <span class="text-2xl mr-3">⚠️</span>
+                            <div>
+                                <h3 class="font-bold text-amber-900 text-sm">Telmi ≠ Panacur</h3>
+                                <p class="text-xs text-amber-800 mt-1">Mebendazol (Telmi) falha no parasita mais perigoso (E. cuniculi).</p>
+                            </div>
                         </div>
-                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                            <h3 class="font-bold text-green-800 mb-2">✅ O Protocolo de Ouro</h3>
-                            <p class="text-sm text-green-800">Exame de fezes anual + Ciclo preventivo de 28 dias de Fenbendazol ao adotar um novo coelho.</p>
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-200 flex items-start">
+                            <span class="text-2xl mr-3">✅</span>
+                            <div>
+                                <h3 class="font-bold text-green-900 text-sm">Protocolo Gold</h3>
+                                <p class="text-xs text-green-800 mt-1">Exame de fezes anual + Panacur na adoção.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- The "Telmi" Breakdown Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Text Content -->
-                <div class="bg-white rounded-2xl shadow p-6">
-                    <h3 class="text-xl font-bold text-stone-800 mb-4">A Confusão dos Medicamentos</h3>
-                    <p class="text-stone-600 mb-4">
-                        Muitos tutores usam o termo "Telmi" referindo-se a pastas orais comuns (como Telmin). 
-                        É crucial entender a diferença química, pois coelhos têm sensibilidades específicas.
-                    </p>
+                <div class="bg-white rounded-3xl shadow-sm p-6 border border-stone-100">
+                    <h3 class="text-lg font-bold text-stone-800 mb-4">A Confusão dos Medicamentos</h3>
                     
                     <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">M</div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-bold text-stone-800">Mebendazol ("Telmi")</h4>
-                                <p class="text-sm text-stone-500">Eficaz contra vermes intestinais (nematodes). Menos eficaz contra o parasita neurológico <em>E. cuniculi</em>. Pode causar toxicidade na medula óssea em doses erradas.</p>
+                        <div class="flex items-start bg-orange-50 p-3 rounded-2xl">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-white flex items-center justify-center text-orange-600 font-bold shadow-sm">M</div>
+                            <div class="ml-3">
+                                <h4 class="text-base font-bold text-stone-800">Mebendazol ("Telmi")</h4>
+                                <p class="text-xs text-stone-600 mt-1">Bom para vermes intestinais. <br><strong>Fraco</strong> contra E. cuniculi (neurológico).</p>
                             </div>
                         </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">F</div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-bold text-stone-800">Fenbendazol (Panacur)</h4>
-                                <p class="text-sm text-stone-500">A escolha #1 de veterinários de exóticos. Trata vermes intestinais E penetra a barreira hematoencefálica para tratar/prevenir <em>E. cuniculi</em>. Mais seguro.</p>
+                        <div class="flex items-start bg-green-50 p-3 rounded-2xl">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-white flex items-center justify-center text-green-600 font-bold shadow-sm">F</div>
+                            <div class="ml-3">
+                                <h4 class="text-base font-bold text-stone-800">Fenbendazol (Panacur)</h4>
+                                <p class="text-xs text-stone-600 mt-1">O preferido dos veterinários. <br>Trata vermes <strong>E</strong> previne E. cuniculi.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Interactive Comparative Chart -->
-                <div class="bg-white rounded-2xl shadow p-6 flex flex-col justify-center">
-                    <h3 class="text-lg font-bold text-stone-800 mb-2 text-center">Espectro de Ação</h3>
+                <div class="bg-white rounded-3xl shadow-sm p-6 border border-stone-100">
+                    <h3 class="text-sm font-bold text-stone-400 uppercase tracking-wide mb-2 text-center">Comparação de Eficácia</h3>
                     <div class="chart-container">
                         <canvas id="efficacyChart"></canvas>
                     </div>
-                    <p class="text-xs text-center text-stone-400 mt-2">Dados baseados em literatura veterinária de animais exóticos.</p>
                 </div>
             </div>
 
-            <!-- Warning Signs -->
-            <div class="bg-stone-800 text-white rounded-2xl shadow-lg p-8">
-                <div class="md:flex md:items-center md:justify-between">
-                    <div class="mb-6 md:mb-0 md:w-2/3">
-                        <h3 class="text-2xl font-bold mb-2">Sintomas de Alerta</h3>
-                        <p class="text-stone-300">Se o seu coelho apresentar qualquer um destes sinais, a desparasitação "caseira" não é suficiente. Consulte um veterinário imediatamente.</p>
-                    </div>
-                    <div class="md:w-1/3 flex justify-end">
-                        <button onclick="switchTab('calculator')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-all shadow-lg transform hover:scale-105">
-                            Verificar o meu Coelho
-                        </button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                    <div class="bg-stone-700 p-3 rounded text-center">
+            <!-- Warning Signs (Dark Mode Card) -->
+            <div class="bg-stone-800 text-white rounded-3xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-2">Sintomas de Alerta 🚨</h3>
+                <p class="text-stone-400 text-sm mb-6">Se vir isto, corra para o veterinário. Não medique em casa.</p>
+                
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-stone-700 p-3 rounded-xl text-center">
                         <span class="block text-2xl mb-1">🤕</span>
-                        <span class="text-sm font-semibold">Cabeça Torta</span>
+                        <span class="text-xs font-semibold">Cabeça Torta</span>
                     </div>
-                    <div class="bg-stone-700 p-3 rounded text-center">
+                    <div class="bg-stone-700 p-3 rounded-xl text-center">
                         <span class="block text-2xl mb-1">💧</span>
-                        <span class="text-sm font-semibold">Beber/Urinar Muito</span>
+                        <span class="text-xs font-semibold">Beber Muito</span>
                     </div>
-                    <div class="bg-stone-700 p-3 rounded text-center">
+                    <div class="bg-stone-700 p-3 rounded-xl text-center">
                         <span class="block text-2xl mb-1">📉</span>
-                        <span class="text-sm font-semibold">Perda de Peso</span>
+                        <span class="text-xs font-semibold">Perda Peso</span>
                     </div>
-                    <div class="bg-stone-700 p-3 rounded text-center">
+                    <div class="bg-stone-700 p-3 rounded-xl text-center">
                         <span class="block text-2xl mb-1">💩</span>
-                        <span class="text-sm font-semibold">Fezes Moles</span>
+                        <span class="text-xs font-semibold">Fezes Moles</span>
                     </div>
                 </div>
+                
+                <button onclick="switchTab('calculator')" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg text-lg active:scale-95 transition-transform">
+                    Verificar o meu Coelho
+                </button>
             </div>
         </div>
 
         <!-- VIEW 2: CALCULATOR (Risk Assessment) -->
-        <div id="calculator" class="hidden-section fade-in">
+        <div id="calculator" class="hidden-section fade-in pb-10">
             <div class="max-w-3xl mx-auto">
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
                     <div class="bg-green-600 p-6">
-                        <h2 class="text-2xl font-bold text-white">Calculadora de Necessidade</h2>
-                        <p class="text-green-100 mt-2">Responda a 4 perguntas para receber uma recomendação técnica.</p>
+                        <h2 class="text-xl font-bold text-white">Calculadora de Risco</h2>
+                        <p class="text-green-100 text-sm mt-1">4 perguntas rápidas para uma recomendação segura.</p>
                     </div>
                     
-                    <div class="p-8 space-y-8">
-                        <!-- Question 1 -->
+                    <div class="p-6 space-y-8">
+                        <!-- Q1 -->
                         <div class="border-b border-stone-100 pb-6">
-                            <label class="block text-lg font-medium text-stone-800 mb-4">1. O seu coelho tem acesso ao exterior (jardim, terra)?</label>
-                            <div class="flex space-x-4">
-                                <button onclick="setRisk('outdoor', true, this)" class="risk-btn-1 flex-1 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Sim, vai à rua</button>
-                                <button onclick="setRisk('outdoor', false, this)" class="risk-btn-1 flex-1 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Não, é 100% interior</button>
+                            <label class="block text-base font-bold text-stone-800 mb-3">1. Acesso ao exterior?</label>
+                            <div class="flex flex-col gap-3">
+                                <button onclick="setRisk('outdoor', true, this)" class="risk-btn risk-btn-1 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Sim, vai ao jardim/terra</button>
+                                <button onclick="setRisk('outdoor', false, this)" class="risk-btn risk-btn-1 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Não, é 100% interior</button>
                             </div>
                         </div>
 
-                        <!-- Question 2 (UPDATED WITH RABBIT OPTION) -->
+                        <!-- Q2 -->
                         <div class="border-b border-stone-100 pb-6">
-                            <label class="block text-lg font-medium text-stone-800 mb-4">2. Convive com outros animais diariamente?</label>
-                            <p class="text-sm text-stone-400 mb-3">O tipo de animal influencia o risco de contágio.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button onclick="setRisk('social', 'none', this)" class="risk-btn-2 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Não, vive sozinho</button>
-                                <button onclick="setRisk('social', 'rabbits', this)" class="risk-btn-2 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Sim, com outros coelhos</button>
-                                <button onclick="setRisk('social', 'pets', this)" class="risk-btn-2 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Sim, cães ou gatos</button>
-                                <button onclick="setRisk('social', 'mixed', this)" class="risk-btn-2 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Sim, várias espécies</button>
+                            <label class="block text-base font-bold text-stone-800 mb-2">2. Com quem vive?</label>
+                            <p class="text-xs text-stone-400 mb-3">O tipo de companhia altera o risco biológico.</p>
+                            <div class="grid grid-cols-1 gap-3">
+                                <button onclick="setRisk('social', 'none', this)" class="risk-btn risk-btn-2 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold flex items-center">
+                                    <span class="text-xl mr-3">🏠</span> Sozinho
+                                </button>
+                                <button onclick="setRisk('social', 'rabbits', this)" class="risk-btn risk-btn-2 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold flex items-center">
+                                    <span class="text-xl mr-3">🐰</span> Com outros Coelhos (Risco Alto)
+                                </button>
+                                <button onclick="setRisk('social', 'pets', this)" class="risk-btn risk-btn-2 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold flex items-center">
+                                    <span class="text-xl mr-3">🐶</span> Com Cães ou Gatos
+                                </button>
+                                <button onclick="setRisk('social', 'mixed', this)" class="risk-btn risk-btn-2 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold flex items-center">
+                                    <span class="text-xl mr-3">🚜</span> Várias Espécies
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Question 3 (UPDATED GAP) -->
+                        <!-- Q3 -->
                         <div class="border-b border-stone-100 pb-6">
-                            <label class="block text-lg font-medium text-stone-800 mb-4">3. Quando foi a última desparasitação preventiva?</label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <button onclick="setRisk('time', 'recent', this)" class="risk-btn-3 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Há menos de 6 meses</button>
-                                <button onclick="setRisk('time', 'medium', this)" class="risk-btn-3 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Entre 6 e 12 meses</button>
-                                <button onclick="setRisk('time', 'old', this)" class="risk-btn-3 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Há mais de 1 ano / Nunca</button>
+                            <label class="block text-base font-bold text-stone-800 mb-3">3. Última desparasitação?</label>
+                            <div class="flex flex-col gap-3">
+                                <button onclick="setRisk('time', 'recent', this)" class="risk-btn risk-btn-3 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Há menos de 6 meses</button>
+                                <button onclick="setRisk('time', 'medium', this)" class="risk-btn risk-btn-3 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Entre 6 e 12 meses</button>
+                                <button onclick="setRisk('time', 'old', this)" class="risk-btn risk-btn-3 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Há mais de 1 ano / Nunca</button>
                             </div>
                         </div>
 
-                        <!-- Question 4 -->
-                        <div class="pb-6">
-                            <label class="block text-lg font-medium text-stone-800 mb-4">4. O coelho é novo em casa (adotado recentemente)?</label>
-                            <div class="flex space-x-4">
-                                <button onclick="setRisk('new', true, this)" class="risk-btn-4 flex-1 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Sim, chegou agora</button>
-                                <button onclick="setRisk('new', false, this)" class="risk-btn-4 flex-1 py-3 border-2 border-stone-200 rounded-lg hover:border-green-500 transition-all font-semibold text-stone-600">Já vive comigo há muito</button>
+                        <!-- Q4 -->
+                        <div class="pb-2">
+                            <label class="block text-base font-bold text-stone-800 mb-3">4. Foi adotado recentemente?</label>
+                            <div class="flex flex-col gap-3">
+                                <button onclick="setRisk('new', true, this)" class="risk-btn risk-btn-4 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Sim, chegou agora a casa</button>
+                                <button onclick="setRisk('new', false, this)" class="risk-btn risk-btn-4 py-4 px-4 border-stone-200 rounded-xl bg-stone-50 text-stone-600 font-semibold text-left">Não, já o tenho há muito</button>
                             </div>
                         </div>
 
-                        <button onclick="calculateRecommendation()" class="w-full bg-stone-800 hover:bg-stone-900 text-white font-bold py-4 rounded-xl text-lg transition-all shadow-lg">Obter Recomendação</button>
+                        <button onclick="calculateRecommendation()" class="w-full bg-stone-800 hover:bg-stone-900 text-white font-bold py-5 rounded-2xl text-xl shadow-lg active:scale-95 transition-transform mt-4">
+                            Ver Resultado
+                        </button>
                     </div>
 
-                    <!-- Result Area (Hidden by default) -->
-                    <div id="calculator-result" class="hidden bg-stone-50 p-8 border-t border-stone-200">
-                        <div id="result-header" class="text-xl font-bold mb-4"></div>
-                        <p id="result-body" class="text-stone-700 mb-6"></p>
+                    <!-- Result Area -->
+                    <div id="calculator-result" class="hidden bg-stone-50 p-6 border-t-2 border-dashed border-stone-300">
+                        <div id="result-badge" class="inline-block px-3 py-1 rounded text-xs font-black uppercase tracking-widest mb-3"></div>
+                        <div id="result-header" class="text-xl font-bold mb-3 text-stone-800"></div>
+                        <p id="result-body" class="text-stone-600 text-sm mb-6 leading-relaxed"></p>
                         
-                        <div class="bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
-                            <h4 class="font-bold text-stone-800 mb-2">Plano Sugerido:</h4>
-                            <ul id="result-plan" class="list-disc list-inside text-stone-600 space-y-2"></ul>
+                        <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                            <h4 class="font-bold text-stone-800 mb-3 uppercase text-xs tracking-wider">Plano de Ação:</h4>
+                            <ul id="result-plan" class="list-disc list-inside text-stone-600 text-sm space-y-2"></ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- VIEW 3: ANALYSIS (Data & Deep Dive) -->
-        <div id="analysis" class="hidden-section fade-in space-y-8">
-            <div class="bg-white p-6 rounded-2xl shadow-lg">
-                <h2 class="text-2xl font-bold text-stone-800 mb-4">Por que nos preocupamos com o <em>E. cuniculi</em>?</h2>
-                <p class="text-stone-600 mb-8 max-w-3xl">
-                    A maioria dos coelhos domésticos não tem vermes intestinais visíveis porque vivem dentro de casa. 
-                    No entanto, o <em>Encephalitozoon cuniculi</em> é um parasita microscópico "silencioso" que pode causar doenças renais e neurológicas graves.
-                    Ao contrário dos vermes, ele não sai nas fezes regularmente, tornando o exame fecal difícil.
+        <!-- VIEW 3: ANALYSIS (Data) -->
+        <div id="analysis" class="hidden-section fade-in space-y-6 pb-10">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-100">
+                <h2 class="text-xl font-bold text-stone-800 mb-3">O Perigo Invisível: <em>E. cuniculi</em></h2>
+                <p class="text-stone-600 text-sm mb-6 leading-relaxed">
+                    A maioria dos coelhos não tem vermes visíveis. O perigo real é microscópico, afeta os rins e o cérebro, e não sai nas fezes regularmente.
                 </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div class="chart-container">
-                        <canvas id="prevalenceChart"></canvas>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-stone-800 mb-4">Realidade Estatística</h3>
-                        <ul class="space-y-4">
-                            <li class="flex items-start">
-                                <span class="bg-red-100 text-red-600 rounded-full p-1 mr-3 text-xs font-bold w-6 h-6 flex items-center justify-center">1</span>
-                                <p class="text-sm text-stone-600"><strong>Alta Exposição:</strong> Estudos mostram que até 70% dos coelhos domésticos têm anticorpos para <em>E. cuniculi</em>, indicando exposição prévia.</p>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="bg-orange-100 text-orange-600 rounded-full p-1 mr-3 text-xs font-bold w-6 h-6 flex items-center justify-center">2</span>
-                                <p class="text-sm text-stone-600"><strong>Latência:</strong> A maioria dos coelhos é portadora assintomática. O estresse (mudança de casa, doença) pode ativar o parasita.</p>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="bg-green-100 text-green-600 rounded-full p-1 mr-3 text-xs font-bold w-6 h-6 flex items-center justify-center">3</span>
-                                <p class="text-sm text-stone-600"><strong>Prevenção:</strong> É por isso que recomendamos um ciclo de 28 dias de Fenbendazol (Panacur) 1 a 2 vezes por ano, ou na chegada de um novo coelho.</p>
-                            </li>
-                        </ul>
-                    </div>
+                <div class="chart-container mb-6">
+                    <canvas id="prevalenceChart"></canvas>
+                </div>
+                
+                <div class="bg-stone-50 rounded-xl p-4 text-sm text-stone-600 border border-stone-200">
+                    <p><strong>Dado Chocante:</strong> Estudos indicam que até 70% dos coelhos já foram expostos. O parasita fica "adormecido" até haver stress.</p>
                 </div>
             </div>
 
-            <!-- Parasite Cards -->
-            <h3 class="text-2xl font-bold text-stone-800 mt-12 mb-6">Conheça os Inimigos</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Parasite Cards (Mobile Optimized) -->
+            <h3 class="text-lg font-bold text-stone-800 px-2">Conheça os Inimigos</h3>
+            <div class="grid grid-cols-1 gap-4">
                 <!-- Card 1 -->
-                <div class="card bg-white rounded-xl overflow-hidden shadow border border-stone-100">
-                    <div class="bg-purple-100 p-4 flex justify-between items-center">
+                <div class="card bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
+                    <div class="bg-purple-100 p-3 flex justify-between items-center">
                         <h4 class="font-bold text-purple-900">E. cuniculi</h4>
-                        <span class="text-2xl">🧠</span>
+                        <span class="text-xl">🧠</span>
                     </div>
-                    <div class="p-6">
-                        <p class="text-sm text-stone-600 mb-4">Microsporídio intracelular. Afeta sistema nervoso e rins.</p>
-                        <div class="text-xs font-semibold uppercase text-stone-400 mb-1">Tratamento Ideal</div>
-                        <div class="text-purple-700 font-bold mb-4">Fenbendazol (28 dias)</div>
-                        <div class="text-xs font-semibold uppercase text-stone-400 mb-1">Eficácia do "Telmi"</div>
-                        <div class="w-full bg-stone-200 rounded-full h-2">
-                            <div class="bg-purple-400 h-2 rounded-full" style="width: 30%"></div>
+                    <div class="p-4">
+                        <p class="text-xs text-stone-600 mb-3">Ataca cérebro e rins.</p>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <div class="text-[10px] uppercase text-stone-400 font-bold">Tratamento</div>
+                                <div class="text-purple-700 font-bold text-sm">Panacur (28 dias)</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] uppercase text-stone-400 font-bold">Eficácia Telmi</div>
+                                <span class="text-red-500 font-bold text-xs">Fraca</span>
+                            </div>
                         </div>
-                        <span class="text-xs text-stone-500">Baixa/Incerta</span>
                     </div>
                 </div>
 
                 <!-- Card 2 -->
-                <div class="card bg-white rounded-xl overflow-hidden shadow border border-stone-100">
-                    <div class="bg-blue-100 p-4 flex justify-between items-center">
+                <div class="card bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
+                    <div class="bg-blue-100 p-3 flex justify-between items-center">
                         <h4 class="font-bold text-blue-900">Coccídias</h4>
-                        <span class="text-2xl">🦠</span>
+                        <span class="text-xl">🦠</span>
                     </div>
-                    <div class="p-6">
-                        <p class="text-sm text-stone-600 mb-4">Protozoários intestinais. Causam diarreia grave em jovens.</p>
-                        <div class="text-xs font-semibold uppercase text-stone-400 mb-1">Tratamento Ideal</div>
-                        <div class="text-blue-700 font-bold mb-4">Toltrazuril (Baycox)</div>
-                        <div class="text-xs font-semibold uppercase text-stone-400 mb-1">Eficácia do "Telmi"</div>
-                        <div class="w-full bg-stone-200 rounded-full h-2">
-                            <div class="bg-blue-400 h-2 rounded-full" style="width: 5%"></div>
+                    <div class="p-4">
+                        <p class="text-xs text-stone-600 mb-3">Diarreia grave em jovens.</p>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <div class="text-[10px] uppercase text-stone-400 font-bold">Tratamento</div>
+                                <div class="text-blue-700 font-bold text-sm">Baycox</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] uppercase text-stone-400 font-bold">Eficácia Telmi</div>
+                                <span class="text-red-500 font-bold text-xs">Zero</span>
+                            </div>
                         </div>
-                        <span class="text-xs text-stone-500">Nula</span>
                     </div>
                 </div>
 
                 <!-- Card 3 -->
-                <div class="card bg-white rounded-xl overflow-hidden shadow border border-stone-100">
-                    <div class="bg-orange-100 p-4 flex justify-between items-center">
-                        <h4 class="font-bold text-orange-900">Oxiúros (Vermes)</h4>
-                        <span class="text-2xl">🪱</span>
+                <div class="card bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
+                    <div class="bg-orange-100 p-3 flex justify-between items-center">
+                        <h4 class="font-bold text-orange-900">Oxiúros</h4>
+                        <span class="text-xl">🪱</span>
                     </div>
-                    <div class="p-6">
-                        <p class="text-sm text-stone-600 mb-4">Vermes visíveis nas fezes. Comuns e menos perigosos.</p>
-                        <div class="text-xs font-semibold uppercase text-stone-400 mb-1">Tratamento Ideal</div>
-                        <div class="text-orange-700 font-bold mb-4">Fenbendazol ou Mebendazol</div>
-                        <div class="text-xs font-semibold uppercase text-stone-400 mb-1">Eficácia do "Telmi"</div>
-                        <div class="w-full bg-stone-200 rounded-full h-2">
-                            <div class="bg-orange-400 h-2 rounded-full" style="width: 90%"></div>
+                    <div class="p-4">
+                        <p class="text-xs text-stone-600 mb-3">Vermes visíveis.</p>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <div class="text-[10px] uppercase text-stone-400 font-bold">Tratamento</div>
+                                <div class="text-orange-700 font-bold text-sm">Panacur ou Telmi</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] uppercase text-stone-400 font-bold">Eficácia Telmi</div>
+                                <span class="text-green-500 font-bold text-xs">Boa</span>
+                            </div>
                         </div>
-                        <span class="text-xs text-stone-500">Alta</span>
                     </div>
                 </div>
             </div>
@@ -335,53 +355,47 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-stone-900 text-stone-400 py-8 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="mb-2">⚠️ <strong>Aviso Importante:</strong> Esta ferramenta é informativa.</p>
-            <p class="text-sm">Nunca medique o seu animal sem consultar um médico veterinário especializado em animais exóticos. As dosagens de cães/gatos podem ser fatais para coelhos.</p>
-        </div>
+    <footer class="bg-stone-900 text-stone-400 py-8 px-4 text-center">
+        <p class="text-xs leading-relaxed max-w-lg mx-auto">
+            ⚠️ <strong>Aviso:</strong> Ferramenta informativa.<br>
+            Consulte sempre um veterinário de exóticos. Dosagens incorretas podem ser fatais.
+        </p>
     </footer>
 
-    <!-- JavaScript Logic -->
+    <!-- Logic -->
     <script>
-        // --- State Management ---
+        // State
         const state = {
-            riskAnswers: {
-                outdoor: null,
-                social: null, // Changed from boolean to string
-                time: null,   // String: 'recent', 'medium', 'old'
-                new: null
-            },
+            riskAnswers: { outdoor: null, social: null, time: null, new: null },
             currentTab: 'dashboard'
         };
 
-        // --- Navigation Logic ---
+        // Navigation
         function switchTab(tabId) {
-            // Hide all sections
-            document.getElementById('dashboard').classList.add('hidden-section');
-            document.getElementById('calculator').classList.add('hidden-section');
-            document.getElementById('analysis').classList.add('hidden-section');
-
-            // Reset Tab Styles
-            document.getElementById('nav-dashboard').className = "px-3 py-2 text-sm font-medium text-stone-500 hover:text-green-600 transition-colors";
-            document.getElementById('nav-calculator').className = "px-3 py-2 text-sm font-medium text-stone-500 hover:text-green-600 transition-colors";
-            document.getElementById('nav-analysis').className = "px-3 py-2 text-sm font-medium text-stone-500 hover:text-green-600 transition-colors";
-
-            // Show Selected
+            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden-section'));
             document.getElementById(tabId).classList.remove('hidden-section');
-            document.getElementById('nav-' + tabId).className = "px-3 py-2 text-sm font-medium active-tab transition-colors";
             
-            state.currentTab = tabId;
+            // Reset Nav Styles
+            ['dashboard', 'calculator', 'analysis'].forEach(id => {
+                const btn = document.getElementById('nav-' + id);
+                btn.classList.remove('active-tab');
+                btn.classList.add('text-stone-500');
+            });
 
-            // Trigger chart resize if needed
-            if (tabId === 'dashboard') {
-                updateEfficacyChart();
-            } else if (tabId === 'analysis') {
-                updatePrevalenceChart();
-            }
+            // Set Active
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.add('active-tab');
+            activeBtn.classList.remove('text-stone-500');
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+
+            // Chart triggers
+            if (tabId === 'dashboard') updateEfficacyChart();
+            if (tabId === 'analysis') updatePrevalenceChart();
         }
 
-        // --- Calculator Logic ---
+        // Calculator Interaction
         function setRisk(key, value, btnElement) {
             state.riskAnswers[key] = value;
             
@@ -392,21 +406,19 @@
             else if (key === 'social') groupClass = '.risk-btn-2';
             else groupClass = '.risk-btn-4';
 
-            // Reset siblings
-            const siblings = document.querySelectorAll(groupClass);
-            siblings.forEach(btn => {
+            document.querySelectorAll(groupClass).forEach(btn => {
                 btn.classList.remove('btn-selected');
-                btn.classList.add('border-stone-200', 'text-stone-600');
+                btn.classList.add('bg-stone-50', 'text-stone-600', 'border-stone-200');
             });
 
-            // Highlight selected
-            btnElement.classList.remove('border-stone-200', 'text-stone-600');
+            btnElement.classList.remove('bg-stone-50', 'text-stone-600', 'border-stone-200');
             btnElement.classList.add('btn-selected');
         }
 
         function calculateRecommendation() {
             const answers = state.riskAnswers;
             const resultDiv = document.getElementById('calculator-result');
+            const badge = document.getElementById('result-badge');
             const header = document.getElementById('result-header');
             const body = document.getElementById('result-body');
             const plan = document.getElementById('result-plan');
@@ -417,70 +429,64 @@
             }
 
             resultDiv.classList.remove('hidden');
-            plan.innerHTML = ''; // Clear previous
+            // Scroll to result smoothly
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            plan.innerHTML = ''; 
 
-            // SCORING LOGIC UPDATED
+            // Logic (V2 Logic)
             let score = 0;
-            
-            if (answers.outdoor) score += 2; // Outdoor risk
+            if (answers.outdoor) score += 2;
+            if (answers.social === 'rabbits') score += 4; // High risk co-living
+            else if (answers.social === 'pets') score += 1;
+            else if (answers.social === 'mixed') score += 4;
+            if (answers.new) score += 3;
+            if (answers.time === 'medium') score += 1; // 6-12 mo
+            if (answers.time === 'old') score += 2; // >1 yr
 
-            // Social Risk (Specific weights)
-            if (answers.social === 'rabbits') score += 4; // High E.cuniculi risk
-            else if (answers.social === 'pets') score += 1; // Moderate risk
-            else if (answers.social === 'mixed') score += 4; // High risk
-            
-            if (answers.new) score += 3; // New addition risk
-
-            // Time Risk (Gap fixed)
-            if (answers.time === 'medium') score += 1; // 6-12 months
-            if (answers.time === 'old') score += 2; // >1 year
-
-            // Logic Tree
             if (answers.new) {
-                // Scenario: New Rabbit (Top Priority)
-                resultDiv.className = "bg-green-50 p-8 border-t border-green-200 mt-6 rounded-b-2xl";
-                header.textContent = "Recomendação: Protocolo de Chegada";
-                header.className = "text-xl font-bold mb-4 text-green-800";
-                body.textContent = "Coelhos recém-adotados trazem histórico desconhecido. A mudança de ambiente causa estresse, baixando a imunidade e ativando parasitas latentes como E. cuniculi.";
+                // New Rabbit
+                badge.className = "inline-block px-3 py-1 rounded text-xs font-black uppercase tracking-widest mb-3 bg-green-100 text-green-800";
+                badge.textContent = "Protocolo de Chegada";
+                header.textContent = "Atenção Total Necessária";
+                body.textContent = "Mudanças de casa baixam a imunidade. É o momento crítico para parasitas.";
                 
-                addPlanItem(plan, "Fazer ciclo de Fenbendazol (Panacur) durante 28 dias imediatamente.");
-                addPlanItem(plan, "Recolher amostra de fezes (3 dias seguidos) para análise de coccídias.");
-                addPlanItem(plan, "Atenção: Se tem outros coelhos, o convívio só deve começar após quarentena.");
+                addPlanItem(plan, "Panacur (Fenbendazol) durante 28 dias.");
+                addPlanItem(plan, "Recolha fezes (3 dias) para pesquisar coccídias.");
+                addPlanItem(plan, "Quarentena antes de juntar com outros.");
 
             } else if (score >= 4) {
-                // Scenario: High Risk Maintenance (Lowered threshold slightly due to social weight)
-                resultDiv.className = "bg-amber-50 p-8 border-t border-amber-200 mt-6 rounded-b-2xl";
-                header.textContent = "Recomendação: Alta Vigilância";
-                header.className = "text-xl font-bold mb-4 text-amber-800";
-                body.innerHTML = "O seu coelho tem fatores de risco significativos. <br><strong>Motivo principal:</strong> " + 
-                    (answers.social === 'rabbits' ? "Convívio com outros coelhos aumenta drasticamente o risco de transmissão silenciosa." : 
-                     answers.outdoor ? "Acesso ao exterior expõe a parasitas de solo." : "Vários fatores combinados.");
+                // High Risk
+                badge.className = "inline-block px-3 py-1 rounded text-xs font-black uppercase tracking-widest mb-3 bg-red-100 text-red-800";
+                badge.textContent = "Risco Elevado";
+                header.textContent = "Alta Vigilância";
                 
-                addPlanItem(plan, "Desparasitação preventiva para E. cuniculi (28 dias) a cada 6 meses.");
-                addPlanItem(plan, "Exame de fezes a cada 6 meses para vermes intestinais.");
-                addPlanItem(plan, "Se vivem coelhos juntos, devem ser desparasitados todos ao mesmo tempo.");
+                const reason = answers.social === 'rabbits' ? "O convívio com outros coelhos é a via nº 1 de contágio." : "Vários fatores de risco detetados.";
+                body.innerHTML = `O seu coelho tem risco significativo. <br><strong>Motivo:</strong> ${reason}`;
+                
+                addPlanItem(plan, "Ciclo preventivo de E. cuniculi a cada 6 meses.");
+                addPlanItem(plan, "Exame de fezes semestral.");
+                addPlanItem(plan, "Tratar todos os coelhos da casa ao mesmo tempo.");
 
             } else if (answers.time === 'medium') {
-                // Scenario: Warning Gap
-                resultDiv.className = "bg-blue-50 p-8 border-t border-blue-200 mt-6 rounded-b-2xl";
-                header.textContent = "Recomendação: Check-up Necessário";
-                header.className = "text-xl font-bold mb-4 text-blue-800";
-                body.textContent = "Passaram-se entre 6 a 12 meses. Embora o risco seja moderado, é a altura ideal para confirmar que tudo está bem antes de medicar.";
+                // Medium Risk (Gap)
+                badge.className = "inline-block px-3 py-1 rounded text-xs font-black uppercase tracking-widest mb-3 bg-blue-100 text-blue-800";
+                badge.textContent = "Manutenção";
+                header.textContent = "Check-up Recomendado";
+                body.textContent = "Passaram 6 a 12 meses. O risco é moderado, mas vale a pena confirmar.";
 
-                addPlanItem(plan, "Realizar exame de fezes para despiste.");
-                addPlanItem(plan, "Se negativo, não medicar 'por rotina'.");
-                addPlanItem(plan, "Reforce a higiene da litiera.");
+                addPlanItem(plan, "Exame de fezes antes de dar qualquer químico.");
+                addPlanItem(plan, "Não dê desparasitante 'às cegas'.");
 
             } else {
-                // Scenario: Low Risk
-                resultDiv.className = "bg-stone-100 p-8 border-t border-stone-200 mt-6 rounded-b-2xl";
-                header.textContent = "Recomendação: Baixa Intervenção";
-                header.className = "text-xl font-bold mb-4 text-stone-800";
-                body.textContent = "Sendo um coelho de interior, sem novos contactos e com histórico estável, o risco de apanhar vermes novos é baixo.";
+                // Low Risk
+                badge.className = "inline-block px-3 py-1 rounded text-xs font-black uppercase tracking-widest mb-3 bg-stone-200 text-stone-600";
+                badge.textContent = "Baixo Risco";
+                header.textContent = "Tudo Estável";
+                body.textContent = "Coelho de interior, sem novos contactos e protegido.";
 
-                addPlanItem(plan, "Não dê 'Telmi' ou desparasitantes de rotina.");
-                addPlanItem(plan, "Faça ciclo de E. cuniculi (Fenbendazol) 1 vez por ano apenas por precaução.");
-                addPlanItem(plan, "Leve fezes para análise no check-up anual de vacinação.");
+                addPlanItem(plan, "Não fazer nada por agora.");
+                addPlanItem(plan, "Apenas check-up anual habitual.");
             }
         }
 
@@ -490,102 +496,56 @@
             list.appendChild(li);
         }
 
-        // --- Charts Implementation ---
+        // Charts
         let efficacyChartInstance = null;
         let prevalenceChartInstance = null;
 
         function updateEfficacyChart() {
             const ctx = document.getElementById('efficacyChart').getContext('2d');
-            
-            if (efficacyChartInstance) return; // Already created
+            if (efficacyChartInstance) return;
 
             efficacyChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Vermes Intestinais (Nematodes)', 'E. cuniculi (Neurológico)', 'Coccídias'],
+                    labels: ['Vermes', 'E. cuniculi', 'Coccídias'],
                     datasets: [
-                        {
-                            label: 'Mebendazol ("Telmi")',
-                            data: [90, 20, 0],
-                            backgroundColor: 'rgba(245, 158, 11, 0.7)', // Amber
-                            borderColor: 'rgba(245, 158, 11, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Fenbendazol (Panacur)',
-                            data: [95, 95, 0],
-                            backgroundColor: 'rgba(22, 163, 74, 0.7)', // Green
-                            borderColor: 'rgba(22, 163, 74, 1)',
-                            borderWidth: 1
-                        }
+                        { label: 'Telmi (Mebendazol)', data: [90, 20, 0], backgroundColor: '#fbbf24' }, // Amber-400
+                        { label: 'Panacur (Fenbendazol)', data: [95, 95, 0], backgroundColor: '#4ade80' } // Green-400
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: '% Eficácia Estimada' }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                footer: (items) => {
-                                    if(items[0].label.includes('Coccídias')) return 'Requer Toltrazuril (Baycox)';
-                                    return '';
-                                }
-                            }
-                        }
-                    }
+                    scales: { y: { beginAtZero: true, max: 100, display: false }, x: { grid: { display: false } } },
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
 
         function updatePrevalenceChart() {
             const ctx = document.getElementById('prevalenceChart').getContext('2d');
-            
             if (prevalenceChartInstance) return;
 
             prevalenceChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Expostos (Anticorpos Positivos)', 'Não Expostos'],
+                    labels: ['Expostos', 'Limpos'],
                     datasets: [{
-                        data: [60, 40],
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.7)', // Red
-                            'rgba(209, 213, 219, 0.5)' // Gray
-                        ],
-                        hoverOffset: 4
+                        data: [70, 30],
+                        backgroundColor: ['#f87171', '#e5e7eb'], // Red-400, Gray-200
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Prevalência de E. cuniculi em Coelhos Domésticos',
-                            font: { size: 16 }
-                        },
-                        subtitle: {
-                            display: true,
-                            text: 'Muitos coelhos têm o parasita "a dormir" no organismo',
-                            padding: { bottom: 20 }
-                        }
-                    }
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
 
-        // Initialize Default View
-        window.addEventListener('load', () => {
-            updateEfficacyChart();
-        });
-
+        window.onload = () => updateEfficacyChart();
     </script>
 </body>
 </html>
